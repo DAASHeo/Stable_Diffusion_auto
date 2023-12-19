@@ -200,6 +200,10 @@ def model_hash(filename):
     except FileNotFoundError:
         return 'NOFILE'
 
+# 모델명 가져오는 함수 -> txt2img에서 사용
+def select_checkpoint_name():
+    model_checkpoint = shared.opts.sd_model_checkpoint
+    return model_checkpoint
 
 def select_checkpoint():
     """Raises `FileNotFoundError` if no checkpoints are found."""

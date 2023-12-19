@@ -1,5 +1,5 @@
+import torch
 import tqdm
-
 from modules import shared
 
 
@@ -20,6 +20,13 @@ class TotalTQDM:
             return
         if self._tqdm is None:
             self.reset()
+
+        #  # VRAM 사용량 확인 및 출력
+        # allocated = torch.cuda.memory_allocated()
+        # cached = torch.cuda.memory_cached()
+        # print(f"Allocated Memory: {allocated / 1024 ** 2} MB")
+        # print(f"Cached Memory: {cached / 1024 ** 2} MB")
+        
         self._tqdm.update()
 
     def updateTotal(self, new_total):

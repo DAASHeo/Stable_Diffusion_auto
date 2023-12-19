@@ -20,6 +20,8 @@ def wrap_queued_call(func):
 def wrap_gradio_gpu_call(func, extra_outputs=None):
     @wraps(func)
     def f(*args, **kwargs):
+        # 작업 시작 알림
+        print("Starting the task...")
 
         # if the first argument is a string that says "task(...)", it is treated as a job id
         if args and type(args[0]) == str and args[0].startswith("task(") and args[0].endswith(")"):
@@ -35,6 +37,12 @@ def wrap_gradio_gpu_call(func, extra_outputs=None):
             try:
                 res = func(*args, **kwargs)
                 progress.record_results(id_task, res)
+
+                # 작업 종료 알림
+                print("Task finished successfully!")
+            except Exception as e:
+                # 오류 발생 알림
+                print(f"An error occurred: {e}")
             finally:
                 progress.finish_task(id_task)
 

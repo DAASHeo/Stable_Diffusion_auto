@@ -745,7 +745,7 @@ def process_images(p: StableDiffusionProcessing) -> Processed:
     return res
 
 
-def process_images_inner(p: StableDiffusionProcessing) -> Processed:
+def process_images_inner(p: StableDiffusionProcessing) -> Processed: #객체 p를 매개변수로 받아옴. 반환 타입 -> Processed
     """this is the main loop that both txt2img and img2img use; it calls func_init once inside all the scopes and func_sample once per batch"""
 
     if isinstance(p.prompt, list):
@@ -753,7 +753,7 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
     else:
         assert p.prompt is not None
 
-    devices.torch_gc()
+    devices.torch_gc() #장치에서 가비지 컬렉터를 호출하여 메모리 정리
 
     seed = get_fixed_seed(p.seed)
     subseed = get_fixed_seed(p.subseed)
@@ -769,15 +769,15 @@ def process_images_inner(p: StableDiffusionProcessing) -> Processed:
         if p.refiner_checkpoint_info is None:
             raise Exception(f'Could not find checkpoint with name {p.refiner_checkpoint}')
 
-    p.sd_model_name = shared.sd_model.sd_checkpoint_info.name_for_extra
+    p.sd_model_name = shared.sd_model.sd_checkpoint_info.name_for_extra # 공유된 모델(선택된 모델 불러옴)
     p.sd_model_hash = shared.sd_model.sd_model_hash
     p.sd_vae_name = sd_vae.get_loaded_vae_name()
     p.sd_vae_hash = sd_vae.get_loaded_vae_hash()
 
-    modules.sd_hijack.model_hijack.apply_circular(p.tiling)
+    modules.sd_hijack.model_hijack.apply_circular(p.tiling) #원형 타일링을 적용, 코멘트를 지웁
     modules.sd_hijack.model_hijack.clear_comments()
 
-    p.setup_prompts()
+    p.setup_prompts() #프롬프트를 설정
 
     if isinstance(seed, list):
         p.all_seeds = seed
@@ -1010,12 +1010,12 @@ def old_hires_fix_first_pass_dimensions(width, height):
 
 @dataclass(repr=False)
 class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
-    enable_hr: bool = False
-    denoising_strength: float = 0.75
+    enable_hr: bool = False #고해상도 이미지 생성을 활성화할지 여부
+    denoising_strength: float = 0.75 #잡음 제거 강도
     firstphase_width: int = 0
     firstphase_height: int = 0
-    hr_scale: float = 2.0
-    hr_upscaler: str = None
+    hr_scale: float = 2.0 #고해상도 이미지의 스케일을 설정
+    hr_upscaler: str = None #고해상도 이미지의 업스케일러를 설정
     hr_second_pass_steps: int = 0
     hr_resize_x: int = 0
     hr_resize_y: int = 0
@@ -1024,7 +1024,7 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
     hr_prompt: str = ''
     hr_negative_prompt: str = ''
 
-    cached_hr_uc = [None, None]
+    cached_hr_uc = [None, None] # 캐시 관련 속성 -> 중간 결과물을 저장하기 위해 사용될 것
     cached_hr_c = [None, None]
 
     hr_checkpoint_info: dict = field(default=None, init=False)
@@ -1042,7 +1042,7 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
     hr_negative_prompts: list = field(default=None, init=False)
     hr_extra_network_data: list = field(default=None, init=False)
 
-    def __post_init__(self):
+    def __post_init__(self): #이 메서드는 클래스 인스턴스가 초기화된 후에 호출
         super().__post_init__()
 
         if self.firstphase_width != 0 or self.firstphase_height != 0:
@@ -1054,7 +1054,7 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
         self.cached_hr_uc = StableDiffusionProcessingTxt2Img.cached_hr_uc
         self.cached_hr_c = StableDiffusionProcessingTxt2Img.cached_hr_c
 
-    def calculate_target_resolution(self):
+    def calculate_target_resolution(self): #이 메서드는 타겟 해상도를 계산하는데 사용
         if opts.use_old_hires_fix_width_height and self.applied_old_hires_behavior_to != (self.width, self.height):
             self.hr_resize_x = self.width
             self.hr_resize_y = self.height
@@ -1093,7 +1093,7 @@ class StableDiffusionProcessingTxt2Img(StableDiffusionProcessing):
                 self.truncate_x = (self.hr_upscale_to_x - target_w) // opt_f
                 self.truncate_y = (self.hr_upscale_to_y - target_h) // opt_f
 
-    def init(self, all_prompts, all_seeds, all_subseeds):
+    def init(self, all_prompts, all_seeds, all_subseeds): #고해상도 이미지 생성에 필요한 설정과 초기화를 수행
         if self.enable_hr:
             if self.hr_checkpoint_name:
                 self.hr_checkpoint_info = sd_models.get_closet_checkpoint_match(self.hr_checkpoint_name)

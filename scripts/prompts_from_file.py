@@ -55,19 +55,19 @@ prompt_tags = {
 
 
 def cmdargs(line):
-    args = shlex.split(line)
+    args = shlex.split(line) ## 문자역 line을 공백을 기준으로 나누어서 args 리스트에 저장
     pos = 0
     res = {}
 
-    while pos < len(args):
+    while pos < len(args): ##args 리스트는 순회하면서 각 인수 처리
         arg = args[pos]
 
-        assert arg.startswith("--"), f'must start with "--": {arg}'
+        assert arg.startswith("--"), f'must start with "--": {arg}' ## 인풋값에 대한 에러 처리
         assert pos+1 < len(args), f'missing argument for command line option {arg}'
 
-        tag = arg[2:]
+        tag = arg[2:] ##arg 문자열에서 --를 제외하고 분리 작업.
 
-        if tag == "prompt" or tag == "negative_prompt":
+        if tag == "prompt" or tag == "negative_prompt": #인수가 prompt or negative_prompt인 경우, 해당 태그의 다음의 값들을 모두 합쳐서 하나의 문자열로 만듬 (왜 그러는지는 모르겠지만 sd의 조건 아닐까)
             pos += 1
             prompt = args[pos]
             pos += 1
@@ -83,7 +83,7 @@ def cmdargs(line):
         assert func, f'unknown commandline option: {arg}'
 
         val = args[pos+1]
-        if tag == "sampler_name":
+        if tag == "sampler_name": #sampler_name 태그의 경우, 그 값을 'sd_samplers_map'에서 찾아서 변환함.
             val = sd_samplers.samplers_map.get(val.lower(), None)
 
         res[tag] = func(val)
@@ -111,6 +111,7 @@ class Script(scripts.Script):
 
         prompt_txt = gr.Textbox(label="List of prompt inputs", lines=1, elem_id=self.elem_id("prompt_txt"))
         file = gr.File(label="Upload prompt inputs", type='binary', elem_id=self.elem_id("file"))
+        
 
         file.change(fn=load_prompt_file, inputs=[file], outputs=[file, prompt_txt, prompt_txt], show_progress=False)
 
